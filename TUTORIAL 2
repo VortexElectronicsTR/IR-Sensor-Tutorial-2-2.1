@@ -1,0 +1,51 @@
+     HEX READING
+
+#include <IRremote.hpp>
+
+#define IR_RECEIVE_PIN 2
+
+void setup() {
+  Serial.begin(9600);
+
+  IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);
+
+  Serial.println("IR Receiver Ready!");
+}
+
+void loop() {
+  if (IrReceiver.decode()) {
+
+    Serial.print("HEX Code: 0x");
+    Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX);
+
+    IrReceiver.resume();
+  }
+}  
+
+   IR LED TOGGLE  
+
+#include <IRremote.hpp>
+
+#define IR_RECEIVE_PIN 2
+#define LED_PIN 10
+
+const uint32_t BUTTON_CODE = 0x000000; // paste your hex
+
+bool ledState = false;
+
+void setup() {
+  pinMode(LED_PIN, OUTPUT);
+  IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);
+}
+
+void loop() {
+  if (IrReceiver.decode()) {
+
+    if (IrReceiver.decodedIRData.decodedRawData == BUTTON_CODE) {
+      ledState = !ledState;
+      digitalWrite(LED_PIN, ledState);
+    }
+
+    IrReceiver.resume();
+  }
+}
