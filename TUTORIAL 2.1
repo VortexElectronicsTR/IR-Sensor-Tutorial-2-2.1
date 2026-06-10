@@ -1,0 +1,67 @@
+#include <IRremote.hpp>
+
+#define IR_RECEIVE_PIN 2
+
+#define RED_PIN   9
+#define GREEN_PIN 11
+#define BLUE_PIN  10
+
+// PASTE YOUR HEX CODES OF YOUR DESIRED BUTTONS
+uint32_t RED_CODE   = 0x00000000;
+uint32_t GREEN_CODE = 0x00000000;
+uint32_t BLUE_CODE  = 0x00000000;
+
+// PASTE YOUR HEX CODE OF YOUR DESIRED BUTTON
+uint32_t POWER_CODE = 0x0x00000000; // ON/OFF toggle
+
+bool ledOn = false;
+
+void setColor(int r, int g, int b) {
+  analogWrite(RED_PIN, r);
+  analogWrite(GREEN_PIN, g);
+  analogWrite(BLUE_PIN, b);
+}
+
+void setup() {
+  pinMode(RED_PIN, OUTPUT);
+  pinMode(GREEN_PIN, OUTPUT);
+  pinMode(BLUE_PIN, OUTPUT);
+
+  Serial.begin(9600);
+  IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);
+}
+
+void loop() {
+  if (IrReceiver.decode()) {
+
+    uint32_t code = IrReceiver.decodedIRData.decodedRawData;
+
+    Serial.print("HEX: 0x");
+    Serial.println(code, HEX);
+
+    // ON/OFF toggle
+    if (code == POWER_CODE) {
+      ledOn = !ledOn;
+
+      if (!ledOn) {
+        setColor(0, 0, 0); // kapat
+      }
+    }
+
+    if (ledOn) {
+      if (code == RED_CODE) {
+        setColor(255, 0, 0);
+      }
+
+      if (code == GREEN_CODE) {
+        setColor(0, 255, 0);
+      }
+
+      if (code == BLUE_CODE) {
+        setColor(0, 0, 255);
+      }
+    }
+
+    IrReceiver.resume();
+  }
+}
